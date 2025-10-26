@@ -6,7 +6,6 @@ import com.swisspost.swisscrypto.dto.WalletResponse;
 import com.swisspost.swisscrypto.entity.Asset;
 import com.swisspost.swisscrypto.entity.User;
 import com.swisspost.swisscrypto.entity.Wallet;
-import com.swisspost.swisscrypto.repository.AssetRepository;
 import com.swisspost.swisscrypto.repository.UserRepository;
 import com.swisspost.swisscrypto.repository.WalletRepository;
 import org.slf4j.Logger;
@@ -25,18 +24,15 @@ public class WalletService {
 
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
-    private final AssetRepository assetRepository;
     private final CoinCapService coinCapService;
 
     public WalletService(
         UserRepository userRepository,
         WalletRepository walletRepository,
-        AssetRepository assetRepository,
         CoinCapService coinCapService
     ) {
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
-        this.assetRepository = assetRepository;
         this.coinCapService = coinCapService;
     }
 
