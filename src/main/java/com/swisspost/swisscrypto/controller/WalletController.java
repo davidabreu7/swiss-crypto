@@ -2,8 +2,11 @@ package com.swisspost.swisscrypto.controller;
 
 import com.swisspost.swisscrypto.dto.AddAssetRequest;
 import com.swisspost.swisscrypto.dto.CreateWalletRequest;
+import com.swisspost.swisscrypto.dto.SimulationRequest;
+import com.swisspost.swisscrypto.dto.SimulationResponse;
 import com.swisspost.swisscrypto.dto.WalletResponse;
 import com.swisspost.swisscrypto.service.WalletService;
+import com.swisspost.swisscrypto.service.WalletSimulationService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +23,11 @@ public class WalletController {
     private static final Logger log = LoggerFactory.getLogger(WalletController.class);
 
     private final WalletService walletService;
+    private final WalletSimulationService simulationService;
 
-    public WalletController(WalletService walletService) {
+    public WalletController(WalletService walletService, WalletSimulationService simulationService) {
         this.walletService = walletService;
+        this.simulationService = simulationService;
     }
 
     @PostMapping
@@ -46,6 +51,13 @@ public class WalletController {
     ) {
         log.info("Adding asset {} to wallet {}", request.symbol(), walletId);
         WalletResponse response = walletService.addAssetToWallet(walletId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/simulate")
+    public ResponseEntity<SimulationResponse> simulateWallet(@Valid @RequestBody SimulationRequest request) {
+        log.info("Simulating wallet with {} assets", request.assets().size());
+        SimulationResponse response = simulationService.simulate(request);
         return ResponseEntity.ok(response);
     }
 }
