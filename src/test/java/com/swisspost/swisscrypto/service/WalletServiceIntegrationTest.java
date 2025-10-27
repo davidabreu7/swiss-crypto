@@ -76,8 +76,8 @@ class WalletServiceIntegrationTest {
         WalletResponse updated = walletService.addAssetToWallet(wallet.id(), assetRequest);
 
         assertThat(updated.assets()).hasSize(1);
-        assertThat(updated.assets().get(0).symbol()).isEqualTo("BTC");
-        assertThat(updated.assets().get(0).quantity()).isEqualByComparingTo(new BigDecimal("1.5"));
+        assertThat(updated.assets().getFirst().symbol()).isEqualTo("BTC");
+        assertThat(updated.assets().getFirst().quantity()).isEqualByComparingTo(new BigDecimal("1.5"));
     }
 
     @Test
