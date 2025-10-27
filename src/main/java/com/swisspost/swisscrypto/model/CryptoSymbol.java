@@ -27,7 +27,8 @@ public enum CryptoSymbol {
 
     public static Optional<CryptoSymbol> fromSymbol(String symbol) {
         return Arrays.stream(values())
-            .filter(crypto -> crypto.name().equals(symbol))
+            .filter(crypto -> crypto.name().equalsIgnoreCase(symbol) ||
+                             crypto.coinCapId.equalsIgnoreCase(symbol))
             .findFirst();
     }
 
