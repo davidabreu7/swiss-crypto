@@ -16,6 +16,7 @@ A Spring Boot application for managing cryptocurrency wallets with automatic pri
 - Automatic price updates every 15 minutes (configurable)
 - Concurrent price fetching (3 threads maximum)
 - Real-time wallet valuation in USD
+- Portfolio performance simulation (current prices or historical dates)
 
 ## Prerequisites
 
@@ -112,6 +113,70 @@ Content-Type: application/json
 ```
 
 **Response:** Updated wallet with new asset
+
+### Simulate Wallet Performance
+
+Simulate portfolio performance by comparing original asset values with current or historical market prices.
+
+**Current Price Simulation (default):**
+```http
+POST /api/wallets/simulate
+Content-Type: application/json
+
+{
+  "assets": [
+    {
+      "symbol": "bitcoin",
+      "quantity": 1.5,
+      "value": 75000.00
+    },
+    {
+      "symbol": "ethereum",
+      "quantity": 10.0,
+      "value": 30000.00
+    }
+  ]
+}
+```
+
+**Historical Date Simulation:**
+```http
+POST /api/wallets/simulate
+Content-Type: application/json
+
+{
+  "assets": [
+    {
+      "symbol": "bitcoin",
+      "quantity": 0.5,
+      "value": 35000.00
+    },
+    {
+      "symbol": "ethereum",
+      "quantity": 4.25,
+      "value": 15310.71
+    }
+  ],
+  "date": "2025-01-07"
+}
+```
+
+**Response:**
+```json
+{
+  "total": 158000.00,
+  "bestAsset": "bitcoin",
+  "bestPerformance": 110.50,
+  "worstAsset": "ethereum",
+  "worstPerformance": 5.25
+}
+```
+
+**Parameters:**
+- `assets` (required): List of assets with symbol, quantity, and original value
+- `date` (optional): ISO date format (YYYY-MM-DD). If omitted, uses current prices
+
+**Note:** This endpoint does not persist any data to the database. Performance is calculated as: `((targetPrice - originalPrice) / originalPrice) * 100`
 
 ## Configuration
 

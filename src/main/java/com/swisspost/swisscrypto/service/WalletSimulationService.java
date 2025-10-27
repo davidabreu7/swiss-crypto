@@ -27,16 +27,20 @@ public class WalletSimulationService {
         Map<String, AssetPerformance> performances = new HashMap<>();
         BigDecimal totalCurrentValue = BigDecimal.ZERO;
 
+        boolean isHistorical = request.date() != null;
+
         for (SimulationAssetRequest asset : request.assets()) {
             if (!coinCapService.isValidSymbol(asset.symbol())) {
                 throw new IllegalArgumentException("Invalid cryptocurrency symbol: " + asset.symbol());
             }
 
             BigDecimal originalPricePerUnit = asset.value().divide(asset.quantity(), 10, RoundingMode.HALF_UP);
-            BigDecimal currentPrice = coinCapService.getCurrentPrice(asset.symbol());
-            BigDecimal currentValue = asset.quantity().multiply(currentPrice);
+            BigDecimal targetPrice = isHistorical
+                ? coinCapService.getHistoricalPrice(asset.symbol(), request.date())
+                : coinCapService.getCurrentPrice(asset.symbol());
+            BigDecimal currentValue = asset.quantity().multiply(targetPrice);
 
-            BigDecimal performancePercentage = currentPrice
+            BigDecimal performancePercentage = targetPrice
                 .subtract(originalPricePerUnit)
                 .divide(originalPricePerUnit, 10, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100));
@@ -44,8 +48,8 @@ public class WalletSimulationService {
             performances.put(asset.symbol(), new AssetPerformance(performancePercentage, currentValue));
             totalCurrentValue = totalCurrentValue.add(currentValue);
 
-            log.debug("Asset {}: original=${}, current=${}, performance={}%",
-                asset.symbol(), originalPricePerUnit, currentPrice, performancePercentage);
+            log.debug("Asset {}: original=${}, target=${}, performance={}%",
+                asset.symbol(), originalPricePerUnit, targetPrice, performancePercentage);
         }
 
         String bestAsset = null;
@@ -67,8 +71,9 @@ public class WalletSimulationService {
             }
         }
 
-        log.info("Simulation complete: total=${}, best={} ({}%), worst={} ({}%)",
-            totalCurrentValue, bestAsset, bestPerformance, worstAsset, worstPerformance);
+        String simulationType = isHistorical ? "historical (" + request.date() + ")" : "current";
+        log.info("Simulation complete ({}): total=${}, best={} ({}%), worst={} ({}%)",
+            simulationType, totalCurrentValue, bestAsset, bestPerformance, worstAsset, worstPerformance);
 
         return new SimulationResponse(
             totalCurrentValue.setScale(2, RoundingMode.HALF_UP),
