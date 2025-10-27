@@ -41,12 +41,13 @@ class WalletServiceIntegrationTest {
     }
 
     @Test
-    void shouldThrowExceptionForDuplicateEmail() {
-        walletService.createWallet("duplicate@example.com");
+    void shouldReturnExistingWalletForDuplicateEmail() {
+        WalletResponse first = walletService.createWallet("duplicate@example.com");
+        WalletResponse second = walletService.createWallet("duplicate@example.com");
 
-        assertThatThrownBy(() -> walletService.createWallet("duplicate@example.com"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("already exists");
+        assertThat(second).isNotNull();
+        assertThat(second.id()).isEqualTo(first.id());
+        assertThat(second.email()).isEqualTo(first.email());
     }
 
     @Test

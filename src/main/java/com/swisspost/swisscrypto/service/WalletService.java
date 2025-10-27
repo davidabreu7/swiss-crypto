@@ -38,18 +38,21 @@ public class WalletService {
 
     @Transactional
     public WalletResponse createWallet(String email) {
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already exists: " + email);
-        }
+        return userRepository.findByEmail(email)
+            .map(existingUser -> {
+                log.info("Wallet already exists for user: {}", email);
+                return toWalletResponse(existingUser.getWallet());
+            })
+            .orElseGet(() -> {
+                User user = User.create(email);
+                Wallet wallet = Wallet.create(user);
+                user.setWallet(wallet);
 
-        User user = User.create(email);
-        Wallet wallet = Wallet.create(user);
-        user.setWallet(wallet);
+                User savedUser = userRepository.save(user);
 
-        User savedUser = userRepository.save(user);
-
-        log.info("Created wallet for user: {}", email);
-        return toWalletResponse(savedUser.getWallet());
+                log.info("Created new wallet for user: {}", email);
+                return toWalletResponse(savedUser.getWallet());
+            });
     }
 
     @Transactional(readOnly = true)

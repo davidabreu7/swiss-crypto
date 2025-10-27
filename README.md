@@ -75,6 +75,8 @@ Content-Type: application/json
 }
 ```
 
+**Note:** This endpoint is idempotent. If a wallet already exists for the email, it returns the existing wallet instead of creating a new one.
+
 ### Get Wallet
 
 ```http
